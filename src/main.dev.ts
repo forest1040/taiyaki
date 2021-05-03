@@ -14,7 +14,7 @@ import path from 'path';
 import { app, BrowserWindow, dialog, ipcMain, shell } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
-import { Card, Content, PrismaClient } from '@prisma/client';
+import { Card, PrismaClient } from '@prisma/client';
 import MenuBuilder from './menu';
 import {
   FILE_EVENTS,
@@ -177,38 +177,18 @@ ipcMain.on(FILE_EVENTS.SAVE_DIALOG, (_, fileInfo: FileInfoType) => {
   mainWindow.webContents.send(FILE_EVENTS.SAVE_FILE, newFileName);
 });
 
-async function getContents() {
-  return await prisma.content.findMany();
-}
-
-ipcMain.handle('load-contents', (event, message) => {
-  console.log(message);
-  return getContents();
-});
-
-async function createContent(content: Content) {
-  return await prisma.content.create({
-    data: content,
-  });
-}
-
-ipcMain.handle('create-content', (event, content: Content) => {
-  console.log(content);
-  return createContent(content);
-});
-
 async function getCards() {
   return await prisma.card.findMany();
 }
 
 ipcMain.handle('load-cards', (event, message) => {
-  console.log(message);
+  //console.log(message);
   return getCards();
 });
 
 async function createCard(card: Card) {
-  console.log('createCard');
-  console.log(card.text);
+  //console.log('createCard');
+  //console.log(card.text);
   await prisma.card.create({
     data: card,
   });
@@ -216,7 +196,7 @@ async function createCard(card: Card) {
 
 async function updateCard(card: Card) {
   console.log('updateCard');
-  console.log(card.text);
+  //console.log(card.text);
   // const hoge = await prisma.card.findMany({
   //   where: {
   //     OR: [{ title: { contains: 'prisma' } }, { text: { contains: 'prisma' } }],
@@ -248,6 +228,8 @@ async function createCards(cards: Card[]) {
       updateCard(card);
     }
   });
+
+  // TODO: 更新完了後、結果を返す
 }
 
 ipcMain.handle('create-cards', (event, cards: Card[]) => {

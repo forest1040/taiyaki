@@ -39,9 +39,9 @@ const MessageInfo: React.FC = () => {
 
   return (
     <div className="inbox-messages" id="inbox-messages">
-      {msgs.map((msg) => {
+      {msgs.map((msg, index) => {
         return (
-          <div className="card">
+          <div className="card" key={index}>
             <div className="card-content">
               {processor.processSync(msg).result as string}
             </div>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRecoilState } from 'recoil';
 import { ipcRenderer } from 'electron';
-import { Card, Content } from '@prisma/client';
+import { Card } from '@prisma/client';
 import SideBar from './SideBar';
 import InfoActionButtons from './InfoActionButtons';
 import PreviewActionButtons from './PreviewActionButtons';
@@ -20,19 +20,11 @@ const openSaveAsDialog = (fileInfo: FileInfoType): void => {
   ipcRenderer.send(FILE_EVENTS.SAVE_DIALOG, fileInfo);
 };
 
-async function createContent(newContent: Content) {
-  // console.log(newContent);
-  await ipcRenderer.invoke('create-content', newContent);
-}
-
-async function loadContent() {
-  // console.log(newContent);
-  return await ipcRenderer.invoke('load-contents');
-}
-
 async function createCards(text: string) {
-  // console.log(newContent);
-  const tmp = text.replaceAll('\r\n', '\n');
+  // 先頭のSPLIT_MESSAGEを削除
+  const re = new RegExp('^' + SPLIT_MESSAGE);
+  let tmp = text.replace(re, '').trim();
+  tmp = tmp.replaceAll('\r\n', '\n');
   const msgs = tmp.split(SPLIT_MESSAGE + '\n');
   //const msgs = text.split(/\r\n|\n/);
   const now = new Date();
@@ -46,11 +38,11 @@ async function createCards(text: string) {
       let id = 0;
       if (head.length > 0 && head[0] == '#') {
         // idを探す
-        const re = /¥(id:[0-9]+¥)/;
-        const m = head.match(re);
+        const m = head.match(/\(id:\d+\)/g);
         if (m != null) {
           // idがある場合
-          id = Number(m.toString());
+          const tmp = m[0].match(/\d+/g) || ['0'];
+          id = parseInt(tmp[0]);
           const idPos = head.indexOf('(id:');
           title = head.substring(1, idPos).trim();
         } else {
@@ -140,36 +132,29 @@ const Board: React.FC = () => {
   const viewCard = (card: Card): string => {
     return `${SPLIT_MESSAGE}
 # ${card.title} (id:${card.id})
-${card.text}
-`;
+${card.text}`;
   };
 
   const handleDBLoad = useCallback(() => {
-    // loadContent().then((contents: Content[]) => {
-    //   if (contents[0] && contents[0].text) {
-    //     setText(contents[0]?.text);
-    //   }
-    // });
     loadCards().then((cards: Card[]) => {
       setText(
         cards
           .map((m) => {
             return viewCard(m);
           })
-          .join('')
+          .join('') + '\n'
       );
     });
   }, []);
 
   const handleDBSave = useCallback(() => {
     createCards(text);
-    // const now = new Date();
-    // createContent({ id: 0, text: text, updatedDate: now, createdDate: now });
   }, [text]);
 
-  //handleDBDelete
   const handleDBDelete = useCallback(() => {
     deleteCards();
+    setText('');
+    setFileName('');
   }, []);
 
   return (

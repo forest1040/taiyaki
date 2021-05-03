@@ -14,7 +14,7 @@ import path from 'path';
 import { app, BrowserWindow, dialog, ipcMain, shell } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
-import { Content, PrismaClient } from '@prisma/client';
+import { Card, Content, PrismaClient } from '@prisma/client';
 import MenuBuilder from './menu';
 import {
   FILE_EVENTS,
@@ -195,4 +195,71 @@ async function createContent(content: Content) {
 ipcMain.handle('create-content', (event, content: Content) => {
   console.log(content);
   return createContent(content);
+});
+
+async function getCards() {
+  return await prisma.card.findMany();
+}
+
+ipcMain.handle('load-cards', (event, message) => {
+  console.log(message);
+  return getCards();
+});
+
+async function createCard(card: Card) {
+  console.log('createCard');
+  console.log(card.text);
+  await prisma.card.create({
+    data: card,
+  });
+}
+
+async function updateCard(card: Card) {
+  console.log('updateCard');
+  console.log(card.text);
+  // const hoge = await prisma.card.findMany({
+  //   where: {
+  //     OR: [{ title: { contains: 'prisma' } }, { text: { contains: 'prisma' } }],
+  //   },
+  // });
+  await prisma.card.updateMany({
+    where: {
+      id: card.id,
+      OR: [{ title: { not: card.title } }, { text: { not: card.text } }],
+    },
+    data: card,
+  });
+
+  // await prisma.card.update({
+  //   where: {
+  //     //AND: [{ id: card.id }, OR:[ {title: card.title}, {text: card.text}]],
+  //     OR:[ {title: {eq: card.title}}, {text: {eq: card.text}}]]
+  //   },
+  //   data: card,
+  // });
+}
+
+async function createCards(cards: Card[]) {
+  //await prisma.card.deleteMany();
+  cards.map((card) => {
+    if (card.id == undefined) {
+      createCard(card);
+    } else {
+      updateCard(card);
+    }
+  });
+}
+
+ipcMain.handle('create-cards', (event, cards: Card[]) => {
+  //console.log(content);
+  return createCards(cards);
+});
+
+async function deleteCards() {
+  await prisma.card.deleteMany();
+}
+
+ipcMain.handle('delete-cards', (event, message) => {
+  //console.log(content);
+  return deleteCards();
 });

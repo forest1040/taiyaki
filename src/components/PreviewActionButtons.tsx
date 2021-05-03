@@ -1,17 +1,22 @@
 import React, { useState } from 'react';
-import { MenuProps } from './InfoActionButtons';
+
+type MenuProps = {
+  onLoadData: () => void;
+  onSaveDate: () => void;
+  onAllClear: () => void;
+};
 
 const PreviewActionButtons: React.FC<MenuProps> = (props) => {
   return (
     <div className="action-buttons">
       <div className="control is-grouped">
-        <a className="button is-small" onClick={props.onFileOpen}>
+        <a className="button is-small" onClick={props.onLoadData}>
           <i className="fa fa-inbox"></i>
         </a>
-        <a className="button is-small" onClick={props.onFileSave}>
+        <a className="button is-small" onClick={props.onSaveDate}>
           <i className="fa fa-chevron-down"></i>
         </a>
-        <a className="button is-small">
+        <a className="button is-small" onClick={props.onAllClear}>
           <i className="fa fa-trash-o"></i>
         </a>
       </div>

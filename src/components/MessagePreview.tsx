@@ -54,6 +54,7 @@ const MessagePreview: React.FC = () => {
           name="EDITOR"
           height="600px"
           width="100%"
+          fontSize="16px"
           mode="text"
           theme="textmate"
           value={text}

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-export type MenuProps = {
+type MenuProps = {
   onFileOpen: () => void;
   onFileSave: () => void;
   onFileSaveAs: () => void;

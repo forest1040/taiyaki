@@ -78,7 +78,7 @@ async function createCards(text: string) {
     })
     .filter((x) => x);
   if (cards.length > 0) {
-    await ipcRenderer.invoke('create-cards', cards);
+    return await ipcRenderer.invoke('create-cards', cards);
   }
 }
 
@@ -137,8 +137,7 @@ const Board: React.FC = () => {
 
   const viewCard = (card: Card): string => {
     return `# ${card.title} (id:${card.id})
-${card.text}
-${SPLIT_MESSAGE}
+${card.text}${SPLIT_MESSAGE}
 `;
   };
 
@@ -155,7 +154,16 @@ ${SPLIT_MESSAGE}
   }, []);
 
   const handleDBSave = useCallback(() => {
-    createCards(text);
+    //createCards(text);
+    createCards(text).then((cards: Card[]) => {
+      setText(
+        cards
+          .map((m) => {
+            return viewCard(m);
+          })
+          .join('') + '\n'
+      );
+    });
   }, [text]);
 
   const handleDBDelete = useCallback(() => {

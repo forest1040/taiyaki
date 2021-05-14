@@ -189,19 +189,13 @@ ipcMain.handle('load-cards', (event, message) => {
 async function createCard(card: Card) {
   //console.log('createCard');
   //console.log(card.text);
-  await prisma.card.create({
+  return await prisma.card.create({
     data: card,
   });
 }
 
 async function updateCard(card: Card) {
-  console.log('updateCard');
-  //console.log(card.text);
-  // const hoge = await prisma.card.findMany({
-  //   where: {
-  //     OR: [{ title: { contains: 'prisma' } }, { text: { contains: 'prisma' } }],
-  //   },
-  // });
+  //console.log('updateCard');
   await prisma.card.updateMany({
     where: {
       id: card.id,
@@ -209,27 +203,21 @@ async function updateCard(card: Card) {
     },
     data: card,
   });
-
-  // await prisma.card.update({
-  //   where: {
-  //     //AND: [{ id: card.id }, OR:[ {title: card.title}, {text: card.text}]],
-  //     OR:[ {title: {eq: card.title}}, {text: {eq: card.text}}]]
-  //   },
-  //   data: card,
-  // });
+  return card;
 }
 
 async function createCards(cards: Card[]) {
   //await prisma.card.deleteMany();
+  const promiseArray: Promise<Card>[] = [];
   cards.map((card) => {
     if (card.id == undefined) {
-      createCard(card);
+      promiseArray.push(createCard(card));
     } else {
-      updateCard(card);
+      promiseArray.push(updateCard(card));
     }
   });
-
-  // TODO: 更新完了後、結果を返す
+  // 更新完了後、結果を返す
+  return Promise.all(promiseArray).then(() => getCards());
 }
 
 ipcMain.handle('create-cards', (event, cards: Card[]) => {

@@ -21,56 +21,62 @@ const openSaveAsDialog = (fileInfo: FileInfoType): void => {
 };
 
 async function createCards(text: string) {
-  // 先頭のSPLIT_MESSAGEを削除
-  const re = new RegExp('^' + SPLIT_MESSAGE);
-  let tmp = text.replace(re, '').trim();
-  tmp = tmp.replaceAll('\r\n', '\n');
+  // // 先頭のSPLIT_MESSAGEを削除
+  // const re = new RegExp('^' + SPLIT_MESSAGE);
+  // let tmp = text.replace(re, '').trim();
+  const tmp = text.replaceAll('\r\n', '\n');
   const msgs = tmp.split(SPLIT_MESSAGE + '\n');
   //const msgs = text.split(/\r\n|\n/);
   const now = new Date();
-  const cards = msgs.map((m) => {
-    // const lines = m.split(/\r\n|\n/);
-    const lines = m.split('\n');
-    if (lines.length > 0) {
-      // 1行目の # を探す
-      const head = lines[0];
-      let title = '';
-      let id = 0;
-      if (head.length > 0 && head[0] == '#') {
-        // idを探す
-        const m = head.match(/\(id:\d+\)/g);
-        if (m != null) {
-          // idがある場合
-          const tmp = m[0].match(/\d+/g) || ['0'];
-          id = parseInt(tmp[0]);
-          const idPos = head.indexOf('(id:');
-          title = head.substring(1, idPos).trim();
+  const cards = msgs
+    .map((m) => {
+      // const lines = m.split(/\r\n|\n/);
+      const lines = m.split('\n');
+      //const check = lines.map((l) => l.trim());
+
+      if (lines.length > 0) {
+        // 空の場合はスキップ
+        if (lines[0].trim().length == 0) return undefined;
+        // 1行目の # を探す
+        const head = lines[0];
+        let title = '';
+        let id = 0;
+        if (head.length > 0 && head[0] == '#') {
+          // idを探す
+          const m = head.match(/\(id:\d+\)/g);
+          if (m != null) {
+            // idがある場合
+            const tmp = m[0].match(/\d+/g) || ['0'];
+            id = parseInt(tmp[0]);
+            const idPos = head.indexOf('(id:');
+            title = head.substring(1, idPos).trim();
+          } else {
+            // titleのみ 「#」を除くため、substring(1)してtrimする
+            title = head.substring(1).trim();
+          }
+        }
+
+        if (id == 0) {
+          // 新規
+          return {
+            title: title,
+            text: title.length > 0 ? lines.slice(1).join('\n') : m,
+            createdDate: now,
+            updatedDate: now,
+          };
         } else {
-          // titleのみ 「#」を除くため、substring(1)してtrimする
-          title = head.substring(1).trim();
+          // 更新の場合
+          return {
+            id: id,
+            title: title,
+            text: lines.slice(1).join('\n'),
+            updatedDate: now,
+          };
         }
       }
-
-      if (id == 0) {
-        // 新規
-        return {
-          title: title,
-          text: title.length > 0 ? lines.slice(1).join('\n') : m,
-          createdDate: now,
-          updatedDate: now,
-        };
-      } else {
-        // 更新の場合
-        return {
-          id: id,
-          title: title,
-          text: lines.slice(1).join('\n'),
-          updatedDate: now,
-        };
-      }
-    }
-    return undefined;
-  });
+      return undefined;
+    })
+    .filter((x) => x);
   if (cards.length > 0) {
     await ipcRenderer.invoke('create-cards', cards);
   }
@@ -130,9 +136,10 @@ const Board: React.FC = () => {
   }, []);
 
   const viewCard = (card: Card): string => {
-    return `${SPLIT_MESSAGE}
-# ${card.title} (id:${card.id})
-${card.text}`;
+    return `# ${card.title} (id:${card.id})
+${card.text}
+${SPLIT_MESSAGE}
+`;
   };
 
   const handleDBLoad = useCallback(() => {
@@ -182,7 +189,7 @@ ${card.text}`;
         >
           <PreviewActionButtons
             onLoadData={handleDBLoad}
-            onSaveDate={handleDBSave}
+            onSaveData={handleDBSave}
             onAllClear={handleDBDelete}
           />
           <MessagePreview />

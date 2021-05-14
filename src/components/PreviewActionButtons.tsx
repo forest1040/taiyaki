@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 type MenuProps = {
   onLoadData: () => void;
-  onSaveDate: () => void;
+  onSaveData: () => void;
   onAllClear: () => void;
 };
 
@@ -13,7 +13,7 @@ const PreviewActionButtons: React.FC<MenuProps> = (props) => {
         <a className="button is-small" onClick={props.onLoadData}>
           <i className="fa fa-inbox"></i>
         </a>
-        <a className="button is-small" onClick={props.onSaveDate}>
+        <a className="button is-small" onClick={props.onSaveData}>
           <i className="fa fa-chevron-down"></i>
         </a>
         <a className="button is-small" onClick={props.onAllClear}>

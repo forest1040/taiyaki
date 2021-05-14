@@ -33,7 +33,7 @@ const splitInfos = (text: string) => {
   );
 };
 
-const MessageInfo: React.FC = () => {
+const CardPreview: React.FC = () => {
   const text = useRecoilValue(textState);
   const msgs = splitInfos(text);
 
@@ -52,7 +52,7 @@ const MessageInfo: React.FC = () => {
   );
 };
 
-export default MessageInfo;
+export default CardPreview;
 
 {
   /* <div className="card">

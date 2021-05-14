@@ -16,7 +16,7 @@ import { textState, fileNameState } from '../models/State';
 //   width: 'inherit',
 // };
 
-const MessagePreview: React.FC = () => {
+const CardEdit: React.FC = () => {
   const [text, setText] = useRecoilState(textState);
   const [fileName, setFileName] = useRecoilState(fileNameState);
 
@@ -70,4 +70,4 @@ const MessagePreview: React.FC = () => {
   );
 };
 
-export default MessagePreview;
+export default CardEdit;

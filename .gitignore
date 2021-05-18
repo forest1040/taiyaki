@@ -51,4 +51,5 @@ npm-debug.log.*
 
 # db
 prisma/sqlite.db
+prisma/sqlite.db-journal
 prisma/migrations

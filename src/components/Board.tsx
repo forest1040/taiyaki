@@ -11,7 +11,7 @@ import MessagePreview from './CardEdit';
 import { FILE_EVENTS, saveFile, FileInfoType } from '../fileIO';
 import { textState, fileNameState } from '../models/State';
 import { SPLIT_MESSAGE } from '../models/Const';
-import { createCards } from '../services/Card';
+import { createCards } from '../models/Card';
 
 const openFileDialog = (): void => {
   ipcRenderer.send(FILE_EVENTS.OPEN_DIALOG);
@@ -82,7 +82,7 @@ const Board: React.FC = () => {
   }, []);
 
   const viewCard = (card: Card): string => {
-    return `# ${card.title} (id:${card.id})
+    return `# ${card.title} (id:${card.id} / tags:${card.tags})
 ${card.text}${SPLIT_MESSAGE}
 `;
   };

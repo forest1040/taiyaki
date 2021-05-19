@@ -1,4 +1,7 @@
+import { Card } from '@prisma/client';
 import { SPLIT_MESSAGE } from '../models/Const';
+
+const TAG_KEY = ' / tags:';
 
 export function createCards(text: string) {
   // // 先頭のSPLIT_MESSAGEを削除
@@ -21,15 +24,22 @@ export function createCards(text: string) {
         const head = lines[0];
         let title = '';
         let id = 0;
+        let tags = '';
         if (head.length > 0 && head[0] == '#') {
           // idを探す
-          const m = head.match(/\(id:\d+\)/g);
+          //const m = head.match(/\(id:\d+\)/g);
+          const m = head.match(/\(id:\d+/g);
           if (m != null) {
             // idがある場合
             const tmp = m[0].match(/\d+/g) || ['0'];
             id = parseInt(tmp[0]);
             const idPos = head.indexOf('(id:');
             title = head.substring(1, idPos).trim();
+            const tagPos = head.indexOf(TAG_KEY);
+            if (tagPos > 0) {
+              tags = head.substring(tagPos + TAG_KEY.length);
+              tags = tags.replace(')', '').trim();
+            }
           } else {
             // titleのみ 「#」を除くため、substring(1)してtrimする
             title = head.substring(1).trim();
@@ -41,6 +51,7 @@ export function createCards(text: string) {
           return {
             title: title,
             text: title.length > 0 ? lines.slice(1).join('\n') : m,
+            tags: tags,
             createdDate: now,
             updatedDate: now,
           };
@@ -50,6 +61,7 @@ export function createCards(text: string) {
             id: id,
             title: title,
             text: lines.slice(1).join('\n'),
+            tags: tags,
             updatedDate: now,
           };
         }

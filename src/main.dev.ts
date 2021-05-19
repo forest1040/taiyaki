@@ -199,7 +199,11 @@ async function updateCard(card: Card) {
   await prisma.card.updateMany({
     where: {
       id: card.id,
-      OR: [{ title: { not: card.title } }, { text: { not: card.text } }],
+      OR: [
+        { title: { not: card.title } },
+        { text: { not: card.text } },
+        { tags: { not: card.tags } },
+      ],
     },
     data: card,
   });
